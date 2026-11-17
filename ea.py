@@ -56,3 +56,17 @@ def crossover(parent1, parent2, method, rng):
                 child1.append(g2)
                 child2.append(g1)
     return child1, child2
+
+def mutate(plan, creep_rate, swap_rate, rng):
+    """Return a mutated copy of plan (the original is not changed)."""
+    plan = plan[:]
+    # creep: each day has a small chance to move up or down one level, kept inside 0-3
+    for d in range(DAYS):
+        if rng.random() < creep_rate:
+            plan[d] = min(3, max(0, plan[d] + rng.choice([-1, 1])))
+    # swap: sometimes swap two days inside one week (the week's total stays the same)
+    if rng.random() < swap_rate:
+        start = WEEK * rng.randrange(DAYS // WEEK)
+        a, b = rng.sample(range(start, start + WEEK), 2)
+        plan[a], plan[b] = plan[b], plan[a]
+    return plan
