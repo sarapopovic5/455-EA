@@ -4,6 +4,7 @@ Evolves a 56-day training plan. Each gene is one day: 0 rest, 1 easy, 2 moderate
 """
 
 import random
+from fitness import score as real_score
 
 DAYS = 56
 WEEK = 7
@@ -78,7 +79,7 @@ def mutate(plan, creep_rate, swap_rate, rng):
         plan[a], plan[b] = plan[b], plan[a]
     return plan
 
-def run_ea(seed, settings=None, score=fake_score):
+def run_ea(seed, settings=None, score=real_score):
     """Run the EA once. Returns (best_plan, best_score, history), where history = {"best": [...], "avg": [...]} with one value per generation."""
 
     s = {**DEFAULT_SETTINGS, **(settings or {})}
