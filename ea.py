@@ -21,15 +21,6 @@ DEFAULT_SETTINGS = {
     "keep_fraction": 0.5,     # best 50% of parents survive each generation
 }
 
-def fake_score(plan):
-    """Stand-in until Sara's score() is ready. Best possible = 8 weeks x 14 = 112."""
-
-    total = sum(plan)
-    over_cap = 0
-    for w in range(0, DAYS, WEEK):
-        over_cap += max(0, sum(plan[w:w + WEEK]) - 14)
-    return total - 2 * over_cap
-
 def random_plan(rng):
     """One random plan: 56 days, each day picked evenly from 0-3."""
 
