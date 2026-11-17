@@ -20,7 +20,6 @@ DEFAULT_SETTINGS = {
     "keep_fraction": 0.5,     # best 50% of parents survive each generation
 }
 
-
 def fake_score(plan):
     """Stand-in until Sara's score() is ready. Best possible = 8 weeks x 14 = 112."""
     total = sum(plan)
@@ -38,3 +37,22 @@ def tournament(population, fitness, k, rng):
     contestants = rng.sample(range(len(population)), k)
     winner = max(contestants, key=lambda i: fitness[i])
     return population[winner]
+
+def crossover(parent1, parent2, method, rng):
+    """Combine two parents into two children."""
+    if method == "week":
+        # one cut, only between weeks: after day 7, 14, ..., 49
+        cut = WEEK * rng.randint(1, DAYS // WEEK - 1)
+        child1 = parent1[:cut] + parent2[cut:]
+        child2 = parent2[:cut] + parent1[cut:]
+    else:
+        # uniform: each day comes from either parent, 50/50
+        child1, child2 = [], []
+        for g1, g2 in zip(parent1, parent2):
+            if rng.random() < 0.5:
+                child1.append(g1)
+                child2.append(g2)
+            else:
+                child1.append(g2)
+                child2.append(g1)
+    return child1, child2
