@@ -32,3 +32,9 @@ def fake_score(plan):
 def random_plan(rng):
     """One random plan: 56 days, each day picked evenly from 0-3."""
     return [rng.choice(LEVELS) for _ in range(DAYS)]
+
+def tournament(population, fitness, k, rng):
+    """Pick k different plans at random; return the one with the highest score."""
+    contestants = rng.sample(range(len(population)), k)
+    winner = max(contestants, key=lambda i: fitness[i])
+    return population[winner]
