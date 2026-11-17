@@ -8,7 +8,7 @@ that gives the best predicted race-day performance (Banister fitness-fatigue mod
 | File | What it does | Owner |
 |---|---|---|
 | `fitness.py` | `score(plan)`: simulates a plan and returns its fitness | Sara (Role 1) |
-| `ea.py` | `run_ea(...)`: the evolutionary algorithm | Role 2 |
+| `ea.py` | `run_ea(...)`: the evolutionary algorithm | Esme Role 2 |
 | (others add their own files here) | | |
 
 Rule: only edit your own file. Tell the repo maintainer if you need something changed elsewhere.
