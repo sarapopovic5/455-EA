@@ -22,6 +22,7 @@ DEFAULT_SETTINGS = {
 
 def fake_score(plan):
     """Stand-in until Sara's score() is ready. Best possible = 8 weeks x 14 = 112."""
+
     total = sum(plan)
     over_cap = 0
     for w in range(0, DAYS, WEEK):
@@ -30,21 +31,25 @@ def fake_score(plan):
 
 def random_plan(rng):
     """One random plan: 56 days, each day picked evenly from 0-3."""
+
     return [rng.choice(LEVELS) for _ in range(DAYS)]
 
 def tournament(population, fitness, k, rng):
     """Pick k different plans at random; return the one with the highest score."""
+
     contestants = rng.sample(range(len(population)), k)
     winner = max(contestants, key=lambda i: fitness[i])
     return population[winner]
 
 def crossover(parent1, parent2, method, rng):
     """Combine two parents into two children."""
+
     if method == "week":
         # one cut, only between weeks: after day 7, 14, ..., 49
         cut = WEEK * rng.randint(1, DAYS // WEEK - 1)
         child1 = parent1[:cut] + parent2[cut:]
         child2 = parent2[:cut] + parent1[cut:]
+
     else:
         # uniform: each day comes from either parent, 50/50
         child1, child2 = [], []
@@ -59,14 +64,63 @@ def crossover(parent1, parent2, method, rng):
 
 def mutate(plan, creep_rate, swap_rate, rng):
     """Return a mutated copy of plan (the original is not changed)."""
+
     plan = plan[:]
     # creep: each day has a small chance to move up or down one level, kept inside 0-3
     for d in range(DAYS):
         if rng.random() < creep_rate:
             plan[d] = min(3, max(0, plan[d] + rng.choice([-1, 1])))
+
     # swap: sometimes swap two days inside one week (the week's total stays the same)
     if rng.random() < swap_rate:
         start = WEEK * rng.randrange(DAYS // WEEK)
         a, b = rng.sample(range(start, start + WEEK), 2)
         plan[a], plan[b] = plan[b], plan[a]
     return plan
+
+def run_ea(seed, settings=None, score=fake_score):
+    """Run the EA once. Returns (best_plan, best_score, history), where history = {"best": [...], "avg": [...]} with one value per generation."""
+
+    s = {**DEFAULT_SETTINGS, **(settings or {})}
+    rng = random.Random(seed)
+
+    # initialization: random plans, each scored once
+    population = [random_plan(rng) for _ in range(s["pop_size"])]
+    fitness = [score(p) for p in population]
+    n_keep = int(s["pop_size"] * s["keep_fraction"])
+    n_children = s["pop_size"] - n_keep
+
+    history = {"best": [], "avg": []}
+    for gen in range(s["generations"]):
+        # make children: select two parents, maybe cross them, then mutate
+        offspring = []
+        while len(offspring) < n_children:
+            p1 = tournament(population, fitness, s["tournament_size"], rng)
+            p2 = tournament(population, fitness, s["tournament_size"], rng)
+            if rng.random() < s["crossover_rate"]:
+                c1, c2 = crossover(p1, p2, s["crossover"], rng)
+            else:
+                c1, c2 = p1[:], p2[:]
+            offspring.append(mutate(c1, s["creep_rate"], s["swap_rate"], rng))
+            offspring.append(mutate(c2, s["creep_rate"], s["swap_rate"], rng))
+        offspring = offspring[:n_children]
+        off_fitness = [score(c) for c in offspring]
+
+        # survivor selection: best n_keep parents + all children
+        ranked = sorted(range(len(population)), key=lambda i: fitness[i], reverse=True)[:n_keep]
+        population = [population[i] for i in ranked] + offspring
+        fitness = [fitness[i] for i in ranked] + off_fitness
+
+        # record this generation for experiments and plots
+        history["best"].append(max(fitness))
+        history["avg"].append(sum(fitness) / len(fitness))
+
+    best = max(range(len(population)), key=lambda i: fitness[i])
+    return population[best], fitness[best], history
+
+if __name__ == "__main__":
+    plan, best, hist = run_ea(seed=1)
+    print("Best score:", best)
+    print("Weekly loads:", [sum(plan[w:w + WEEK]) for w in range(0, DAYS, WEEK)])
+    for w in range(0, DAYS, WEEK):
+        print(f"Week {w // WEEK + 1}:", plan[w:w + WEEK])
