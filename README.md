@@ -8,7 +8,9 @@ that gives the best predicted race-day performance (Banister fitness-fatigue mod
 | File | What it does | Owner |
 |---|---|---|
 | `fitness.py` | `score(plan)`: simulates a plan and returns its fitness | Sara (Role 1) |
-| `ea.py` | `run_ea(...)`: the evolutionary algorithm | Esme Role 2 |
+| `test_fitness.py` | Tests for the fitness model | Sara (Role 1) |
+| `ea.py` | `run_ea(...)`: the evolutionary algorithm | Esme (Role 2) |
+| `test_ea.py` | Tests for the EA | Esme (Role 2) |
 | (others add their own files here) | | |
 
 Rule: only edit your own file. Tell the repo maintainer if you need something changed elsewhere.
@@ -17,17 +19,22 @@ Rule: only edit your own file. Tell the repo maintainer if you need something ch
 
 ```
 pip install -r requirements.txt
-python ea.py
+python ea.py                  # one EA run with the fitness model
+python -m unittest -v         # run every test in the repo
 ```
+
+Run the tests before opening a pull request to make sure nothing broke.
 
 ## How the pieces connect
 
 - **plan**: a list of 56 integers, one per day, each 0 = rest, 1 = easy, 2 = moderate, 3 = hard.
   Days 0-6 are week 1, days 7-13 are week 2, and so on.
-- **`score(plan)`** returns one number. Higher is better. It must not change `plan`,
-  and the same plan must always get the same score.
+- **`score(plan, lam=2.0, rules=True)`** returns one number. Higher is better. It must not change `plan`,
+  and the same plan must always get the same score. `lam` sets the penalty weight; `rules=False` scores
+  performance only.
 - **`run_ea(seed, settings, score)`** returns `(best_plan, best_score, history)`.
-  `history` is `{"best": [...], "avg": [...]}`, one value per generation.
+  `settings` is optional and overrides any default, e.g. `{"crossover": "uniform"}`.
+  `score` defaults to `fitness.score`. `history` is `{"best": [...], "avg": [...]}`, one value per generation.
   The same seed always gives the same result.
 
 ## How to add your code
