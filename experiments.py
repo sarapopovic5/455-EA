@@ -78,7 +78,7 @@ def main():
         })
 
     with open("results/summary.csv", "w", newline="") as f:
-        writer = csv.DictWriter(f, fieldnames=rows[0].keys())
+        writer = csv.DictWriter(f, fieldnames=rows[0].keys(), lineterminator="\n")
         writer.writeheader()
         writer.writerows(rows)
     with open("results/runs.json", "w") as f:
