@@ -125,8 +125,8 @@ def total_violations(plan):
 def score(plan, lam=LAMBDA, rules=True):
     """F = P - lam * total violations. Higher is better.
 
-    lam   : penalty weight (for the lambda experiments: 0.5, 2, 10)
-    rules : set False to score P alone (the "rules off" experiment)
+    lam   : penalty weight (the experiments use 0, 0.02, 0.05, 0.1, 2 and 10)
+    rules : set False to score P alone (same as lam = 0)
     """
     p = performance(plan)
     if not rules:
